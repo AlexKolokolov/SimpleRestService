@@ -51,6 +51,7 @@
                 <executions>
                     <execution>
                         <configuration>
+                            <finalName>SimpleRestService</finalName>
                             <mainClass>ua.djhans.boot.Application</mainClass>
                         </configuration>
                         <goals>

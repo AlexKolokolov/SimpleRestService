@@ -1,1 +1,2 @@
-java -Xmx512m -jar target/sparksql-test-1.0-SNAPSHOT.jar
+java -Xmx512m -jar target/SimpleRestService.jar
+pause

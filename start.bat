@@ -1,3 +1,1 @@
-java -Xmx512m -jar target/SimpleRestService.jar
-start http://localhost:8080/hello/contacts?nameFilter=
-pause
+java -Xmx512m -jar target/sparksql-test-1.0-SNAPSHOT.jar

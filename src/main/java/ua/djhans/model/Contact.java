@@ -1,7 +1,7 @@
 package ua.djhans.model;
 
 /**
- * Created by Administrator on 23.01.2016.
+ * Класс объектов, в которые будут преобразовываться строки из базы данных.
  */
 public class Contact {
     private long id;

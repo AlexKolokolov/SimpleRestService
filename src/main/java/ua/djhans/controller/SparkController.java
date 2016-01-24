@@ -10,28 +10,47 @@ import ua.djhans.model.Contact;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 /**
- * Created by Administrator on 22.01.2016.
+ * При создании экземпляра этого класса создается объект dataFrame класса DataFrame,
+ * в который помещается содержимое таблицы contacts из базы данных PostgreSQL,
+ * и далее хранится в паямти для быстрого доступа к данным.
+ * При внесении изменений в таблицу contacts, изменния вносятся и в dataFrame.
  */
 public class SparkController {
     private static SparkController instance = new SparkController();
     private DataFrame dataFrame;
+    private String dataBaseHost;
+    private String dataBasePort;
+    private String dataBaseName;
+    private String dataBaseUser;
+    private String dataBasePassword;
+    private String dataBaseTable;
 
     private SparkController(){
         JavaSparkContext sc = new JavaSparkContext(new SparkConf().setAppName("JavaSparkSQL").setMaster("local[*]"));
         SQLContext sqlContext = new SQLContext(sc);
 
         try {
+            ResourceBundle bundle = ResourceBundle.getBundle("DBConnection");
+            dataBaseHost = bundle.getString("host");
+            dataBasePort = bundle.getString("port");
+            dataBaseName = bundle.getString("database");
+            dataBaseUser = bundle.getString("user");
+            dataBasePassword = bundle.getString("password");
+            dataBaseTable = bundle.getString("table");
             Class.forName("org.postgresql.Driver");
             System.out.println("PostgreSQL JDBC Driver Registered!");
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | MissingResourceException e) {
             e.printStackTrace();
         }
 
-        Map<String, String> options = new HashMap<String, String>();
-        options.put("url", "jdbc:postgresql://localhost:5432/contacts?user=postgres&password=7ktndNb,tnt");
-        options.put("dbtable", "contacts");
+        Map<String, String> options = new HashMap<>();
+        options.put("url", "jdbc:postgresql://" + dataBaseHost + ":" + dataBasePort +"/" +
+                dataBaseName + "?user=" + dataBaseUser + "&password=" + dataBasePassword);
+        options.put("dbtable", dataBaseTable);
         options.put("driver", "org.postgresql.Driver");
 
         dataFrame = sqlContext.read().format("jdbc").options(options).load();
@@ -41,25 +60,33 @@ public class SparkController {
         return instance;
     }
 
-    public DataFrame filterData(String regEx) {
+    /**
+     * Метод принимает на вход регулярное выражение и возвращает объект класса DataFrame,
+     * в котором не содержится записей, совпадающих с регулярным выражением.
+     * При этом установлен лимит на количество записей в результирущем наборе в размере 100 шт.
+     */
+    private DataFrame filterData(String regEx) {
         return dataFrame.filter(dataFrame.col("name").rlike(invertRegEx(regEx))).limit(100);
     }
 
-    public Contact[] getContacts(String regEx) {
+    /**
+     * Метод принимает на вход регулярное выражение и возвращает массив объектов Contact,
+     * у которых поле name не совпадает с ргулярным выражением. Массив содержит максимум 100 элементов.
+     */
+    public Contact[] getFilteredContacts(String regEx) {
         List<Row> dataList = getInstance().filterData(regEx).collectAsList();
         Contact[] contacts = new Contact[dataList.size()];
-        for (int i = 0; i < dataList.size() ; i++) {
+        for (int i = 0; i < dataList.size(); i++) {
             contacts[i] = new Contact(dataList.get(i).getLong(0), dataList.get(i).getString(1));
         }
         return contacts;
     }
 
+    /**
+     * Метод принимает на вход регулярное выражение и возвращает регулярное выражение,
+     * обратное принятому.
+     */
     private static String invertRegEx(String regEx) {
         return "^(?!" + regEx + "$).*$";
-    }
-
-    public static void main(String[] args) {
-        Contact[] contacts = getInstance().getContacts("^J.*$");
-        for (Contact contact : contacts) System.out.println(contact);
     }
 }

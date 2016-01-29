@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
  * При внесении изменений в таблицу contacts, изменния вносятся и в dataFrame.
  */
 public class SparkController {
-    private static SparkController instance = new SparkController();
+    private static final SparkController INSTANCE = new SparkController();
     private DataFrame dataFrame;
     private String dataBaseHost;
     private String dataBasePort;
@@ -57,7 +57,7 @@ public class SparkController {
     }
 
     public static SparkController getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     /**
@@ -74,7 +74,7 @@ public class SparkController {
      * у которых поле name не совпадает с ргулярным выражением. Массив содержит максимум 100 элементов.
      */
     public Contact[] getFilteredContacts(String regEx) {
-        List<Row> dataList = getInstance().filterData(regEx).collectAsList();
+        List<Row> dataList = filterData(regEx).collectAsList();
         Contact[] contacts = new Contact[dataList.size()];
         for (int i = 0; i < dataList.size(); i++) {
             contacts[i] = new Contact(dataList.get(i).getLong(0), dataList.get(i).getString(1));

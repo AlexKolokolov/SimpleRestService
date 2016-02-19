@@ -5,6 +5,9 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
+
+import org.springframework.stereotype.Controller;
+
 import ua.djhans.model.Contact;
 
 import java.util.HashMap;
@@ -19,8 +22,8 @@ import java.util.ResourceBundle;
  * и далее хранится в паямти для быстрого доступа к данным.
  * При внесении изменений в таблицу contacts, изменния вносятся и в dataFrame.
  */
-public class SparkController {
-    private static final SparkController INSTANCE = new SparkController();
+@Controller
+public class SparkController implements DAO {
     private DataFrame dataFrame;
     private String dataBaseHost;
     private String dataBasePort;
@@ -29,7 +32,7 @@ public class SparkController {
     private String dataBasePassword;
     private String dataBaseTable;
 
-    private SparkController(){
+    public SparkController(){
         JavaSparkContext sc = new JavaSparkContext(new SparkConf().setAppName("JavaSparkSQL").setMaster("local[*]"));
         SQLContext sqlContext = new SQLContext(sc);
 
@@ -56,10 +59,6 @@ public class SparkController {
         dataFrame = sqlContext.read().format("jdbc").options(options).load();
     }
 
-    public static SparkController getInstance() {
-        return INSTANCE;
-    }
-
     /**
      * Метод принимает на вход регулярное выражение и возвращает объект класса DataFrame,
      * в котором не содержится записей, совпадающих с регулярным выражением.
@@ -73,6 +72,7 @@ public class SparkController {
      * Метод принимает на вход регулярное выражение и возвращает массив объектов Contact,
      * у которых поле name не совпадает с ргулярным выражением. Массив содержит максимум 100 элементов.
      */
+    @Override
     public Contact[] getFilteredContacts(String regEx) {
         List<Row> dataList = filterData(regEx).collectAsList();
         Contact[] contacts = new Contact[dataList.size()];

@@ -1,9 +1,12 @@
 package ua.djhans.boot;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ua.djhans.controller.SparkController;
+import ua.djhans.controller.DAO;
 import ua.djhans.model.Contact;
 
 /**
@@ -16,9 +19,13 @@ import ua.djhans.model.Contact;
 @RequestMapping("/hello")
 @RestController
 public class RestServiceController {
+
+    @Autowired
+    private DAO dao;
+
     @RequestMapping("/contacts")
     public Contact[] getContacts(@RequestParam(value="nameFilter", defaultValue="") String regEx) {
-        return SparkController.getInstance().getFilteredContacts(regEx);
+        return dao.getFilteredContacts(regEx);
     }
 }
 

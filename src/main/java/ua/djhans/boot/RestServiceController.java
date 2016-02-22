@@ -16,6 +16,7 @@ import ua.djhans.model.Contact;
  * массив будет содержать только те контакты из базы данных, в которых поле name не совпадает
  * с заданным регулярным выражением. Их количество также не будет превышать 100 штук.
  */
+@ComponentScan(basePackages = {"ua.djhans.boot", "ua.djhans.controller"})
 @RequestMapping("/hello")
 @RestController
 public class RestServiceController {

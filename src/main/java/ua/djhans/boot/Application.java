@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 /**
  * Main класс для запуска приложения
  */
-@ComponentScan(basePackages = {"ua.djhans"})
+@ComponentScan(basePackages = {"ua.djhans.boot", "ua.djhans.controller"})
 @SpringBootApplication
 public class Application {
 
